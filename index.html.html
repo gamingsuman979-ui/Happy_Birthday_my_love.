@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A Special Birthday Wish</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <link href="https://api.fontshare.com/v2/css?f[]=satoshi@400,700&display=swap" rel="stylesheet">
+    
+    <!-- Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
+    
+    <style>
+        :root {
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Satoshi', sans-serif;
+            --dark-bg: #0c0a09;
+            --text-light: #e2e8f0;
+            --pink: hsla(333, 70%, 55%, 1);
+            --purple: hsla(282, 82%, 54%, 1);
+            --blue: hsla(210, 89%, 60%, 1);
+            --gold: hsla(35, 90%, 60%, 1);
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-light);
+            font-family: var(--font-body);
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        #bg-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+
+        .aurora {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background-color: var(--dark-bg);
+            opacity: 0.8;
+            pointer-events: none;
+        }
+
+        .aurora::after, .aurora::before {
+            content: '';
+            position: absolute;
+            width: 100vmax;
+            height: 100vmax;
+            top: 50%;
+            left: 50%;
+            border-radius: 50%;
+            animation: breathe 15s linear infinite;
+            filter: blur(100px);
+        }
+
+        .aurora::after {
+            background: radial-gradient(circle, hsla(333,70%,55%,.4) 10%, hsla(282, 82%, 54%, .3) 30%, hsla(210, 89%, 60%, .3) 50%, transparent 70%);
+            animation-duration: 15s;
+        }
+
+        .aurora::before {
+            background: radial-gradient(circle, hsla(35, 90%, 60%, .3) 10%, hsla(210, 89%, 60%, .3) 30%, transparent 60%);
+            animation-duration: 20s;
+            animation-direction: reverse;
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: translate(-50%, -50%) scale(0.8) rotate(0deg); }
+            50% { transform: translate(-50%, -50%) scale(1.2) rotate(180deg); }
+        }
+
+        main {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .step-card {
+            position: absolute;
+            visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            width: 90%;
+            max-width: 500px;
+            padding: 2.5rem;
+            background: rgba(12, 10, 9, 0.45);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        h1, h2 {
+            font-family: var(--font-heading);
+            font-size: clamp(2rem, 6vw, 3.5rem);
+            background: linear-gradient(120deg, #f9a8d4, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 0 0 1rem 0;
+        }
+        
+        h2 {
+           font-size: clamp(1.75rem, 5vw, 2.5rem);
+        }
+
+        p {
+            font-size: clamp(1rem, 2.5vw, 1.15rem);
+            line-height: 1.6;
+            margin: 0 0 2rem 0;
+            color: var(--text-light);
+            max-width: 400px;
+        }
+
+        .icon {
+            font-size: 4rem;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .beating-heart {
+            animation: beat 1.5s ease-in-out infinite, glow-pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes beat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        @keyframes glow-pulse {
+             0%, 100% { text-shadow: 0 0 10px #f472b6, 0 0 20px #f472b6; }
+            50% { text-shadow: 0 0 20px #ec4899, 0 0 40px #ec4899; }
+        }
+
+        .action-button {
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1rem;
+            color: white;
+            padding: 0.75rem 2rem;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(90deg, #ec4899, #d946ef);
+            box-shadow: 0 0 15px rgba(236, 72, 153, 0.5);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: scale(1);
+        }
+
+        .action-button:hover {
+            transform: scale(1.05) translateY(-3px);
+            box-shadow: 0 0 25px rgba(236, 72, 153, 0.8);
+        }
+        
+        .action-button:active {
+            transform: scale(0.98);
+        }
+
+        #progress-bar-container {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            max-width: 400px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(5px);
+            border-radius: 5px;
+            z-index: 100;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, #ec4899, #f472b6);
+            border-radius: 5px;
+        }
+
+        .bento-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            width: 100%;
+            margin-bottom: 2rem;
+        }
+        .bento-item {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 1rem;
+            text-align: left;
+        }
+        .bento-item h3 {
+            font-family: var(--font-body);
+            font-weight: 700;
+            font-size: 1rem;
+            margin: 0 0 0.5rem 0;
+            color: #f9a8d4;
+        }
+        .bento-item p {
+            font-size: 0.9rem;
+            line-height: 1.4;
+            margin: 0;
+        }
+        .bento-item:nth-child(1) { grid-column: span 2; }
+        .bento-item:nth-child(3) { grid-column: span 2; }
+
+        .polaroid-container {
+            margin-bottom: 2rem;
+            perspective: 1000px;
+        }
+        .polaroid {
+            width: 250px;
+            background: white;
+            padding: 1rem;
+            padding-bottom: 4rem;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            border-radius: 5px;
+            position: relative;
+            transform: rotateZ(-5deg);
+            transition: transform 0.5s ease;
+        }
+        .polaroid img {
+            width: 100%;
+            display: block;
+        }
+        .polaroid figcaption {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            right: 1rem;
+            text-align: center;
+            font-family: 'Playfair Display', serif;
+            color: #333;
+            font-size: 1.2rem;
+        }
+
+        #final-message {
+            visibility: hidden;
+            font-family: var(--font-heading);
+            font-size: 1.75rem;
+            margin-top: 1.5rem;
+            background: linear-gradient(120deg, #f9a8d4, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .step-card {
+                padding: 1.5rem;
+            }
+             .bento-item {
+                grid-column: span 2 !important;
+             }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="aurora"></div>
+    <canvas id="bg-canvas"></canvas>
+
+    <div id="progress-bar-container">
+        <div id="progress-bar"></div>
+    </div>
+
+    <main>
+        <!-- Step 1: Welcome -->
+        <div id="step-1" class="step-card">
+            <div class="icon beating-heart">❤️</div>
+            <h1>Hey Beautiful,</h1>
+            <p>I built a little world for you, just to bring a smile to your face on your special day.</p>
+            <button class="action-button" data-next="2">Let's Begin</button>
+        </div>
+
+        <!-- Step 2: Core Message -->
+        <div id="step-2" class="step-card">
+            <div class="icon">🎉</div>
+            <h2>Happy Birthday!</h2>
+            <p>Another year of you making the world brighter. Your existence is a gift, and I'm so lucky to witness it.</p>
+            <button class="action-button" data-next="3">There's more...</button>
+        </div>
+
+        <!-- Step 3: Reasons Why -->
+        <div id="step-3" class="step-card">
+             <h2>A Few Things I Adore About You</h2>
+            <div class="bento-grid">
+                <div class="bento-item">
+                    <h3>✨ Your Unmatched Kindness</h3>
+                    <p>The genuine warmth you show to everyone is something truly rare and beautiful.</p>
+                </div>
+                <div class="bento-item">
+                    <h3>😊 That Smile</h3>
+                    <p>It's a work of art.</p>
+                </div>
+                <div class="bento-item">
+                    <h3>🌟 Your Radiant Spirit</h3>
+                    <p>Your passion for life is infectious. Being around you makes everything feel more exciting and possible.</p>
+                </div>
+            </div>
+            <button class="action-button" data-next="4">Remember this?</button>
+        </div>
+
+        <!-- Step 4: Shared Memory -->
+        <div id="step-4" class="step-card">
+            <h2>That One Time...</h2>
+            <div class="polaroid-container">
+                <figure class="polaroid" id="polaroid">
+                    <img src="https://i.ibb.co/6Z6XgCg/crush.webp" alt="A cherished memory">
+                    <figcaption>Our favorite memory.</figcaption>
+                </figure>
+            </div>
+            <p>Every moment with you feels like a scene from a movie I'd watch on repeat.</p>
+            <button class="action-button" data-next="5">One last thing...</button>
+        </div>
+
+        <!-- Step 5: Finale -->
+        <div id="step-5" class="step-card">
+            <div class="icon">🎂</div>
+            <h2>My Wish For You</h2>
+            <p>May the next year bring you all the love, success, and pure happiness you so rightfully deserve. May your dreams soar higher than ever.</p>
+            <div id="final-message">Happy Birthday, my crush! ❤️</div>
+            <button id="celebrate-btn" class="action-button">Celebrate!</button>
+        </div>
+    </main>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- THREE.JS 3D HEARTS SETUP ---
+            let scene, camera, renderer, hearts;
+            const heartCount = 25;
+            let finaleRunning = false;
+
+            function initThree() {
+                scene = new THREE.Scene();
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.z = 5;
+
+                renderer = new THREE.WebGLRenderer({
+                    canvas: document.getElementById('bg-canvas'),
+                    alpha: true
+                });
+                renderer.setSize(window.innerWidth, window.innerHeight);
+
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.2);
+                scene.add(ambientLight);
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 5, 5);
+                scene.add(directionalLight);
+
+                hearts = new THREE.Group();
+                const heartShape = new THREE.Shape();
+                heartShape.moveTo(0.25, 0.25);
+                heartShape.bezierCurveTo(0.25, 0.25, 0.2, 0, 0, 0);
+                heartShape.bezierCurveTo(-0.3, 0, -0.3, 0.35, -0.3, 0.35);
+                heartShape.bezierCurveTo(-0.3, 0.55, -0.1, 0.77, 0.25, 0.95);
+                heartShape.bezierCurveTo(0.6, 0.77, 0.8, 0.55, 0.8, 0.35);
+                heartShape.bezierCurveTo(0.8, 0.35, 0.8, 0, 0.5, 0);
+                heartShape.bezierCurveTo(0.35, 0, 0.25, 0.25, 0.25, 0.25);
+
+                const extrudeSettings = { depth: 0.1, bevelEnabled: true, bevelSegments: 2, steps: 2, bevelSize: 0.05, bevelThickness: 0.05 };
+                const geometry = new THREE.ExtrudeGeometry(heartShape, extrudeSettings);
+                const material = new THREE.MeshStandardMaterial({
+                    color: 0xea4c89,
+                    metalness: 0.1,
+                    roughness: 0.4
+                });
+
+                for (let i = 0; i < heartCount; i++) {
+                    const heart = new THREE.Mesh(geometry, material);
+                    heart.position.set(
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10,
+                        (Math.random() - 0.5) * 10
+                    );
+                    heart.rotation.set(
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI,
+                        Math.random() * Math.PI
+                    );
+                    const scale = Math.random() * 0.5 + 0.2;
+                    heart.scale.set(scale, scale, scale);
+                    
+                    heart.userData.baseY = heart.position.y;
+                    heart.userData.sineOffset = Math.random() * Math.PI * 2;
+                    
+                    hearts.add(heart);
+                }
+                scene.add(hearts);
+
+                animate();
+            }
+
+            function animate() {
+                requestAnimationFrame(animate);
+                
+                if(!finaleRunning){
+                    hearts.children.forEach((heart, i) => {
+                        heart.rotation.y += 0.005;
+                        heart.rotation.x += 0.002;
+                        
+                        // Sine wave motion
+                        heart.userData.sineOffset += 0.01;
+                        heart.position.y = heart.userData.baseY + Math.sin(heart.userData.sineOffset) * 0.2;
+
+                        // Reset if they go too far
+                        if (heart.position.y > 6) {
+                           heart.userData.baseY = -6;
+                           heart.position.y = -6;
+                        }
+                    });
+                }
+                
+                renderer.render(scene, camera);
+            }
+
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+
+            window.addEventListener('resize', onWindowResize);
+            initThree();
+
+
+            // --- GSAP & INTERACTIVITY ---
+            const buttons = document.querySelectorAll('.action-button');
+            const numSteps = 5;
+            gsap.set('.step-card', { autoAlpha: 0, scale: 0.8, y: 50 });
+
+            function goToStep(stepNumber) {
+                const currentStep = document.querySelector(`.step-card:not([style*="visibility: hidden"])`);
+                const nextStep = document.getElementById(`step-${stepNumber}`);
+                
+                const tl = gsap.timeline({
+                    onComplete: () => {
+                       if (currentStep && currentStep !== nextStep) {
+                            gsap.set(currentStep, { autoAlpha: 0 });
+                       }
+                    }
+                });
+
+                if (currentStep) {
+                     tl.to(currentStep, { autoAlpha: 0, scale: 0.8, duration: 0.4, ease: "power2.in" });
+                }
+
+                tl.to(nextStep, {
+                    autoAlpha: 1,
+                    scale: 1,
+                    y: 0,
+                    duration: 0.6,
+                    ease: "power2.out"
+                }, currentStep ? "-=0.1" : "+=0");
+                
+                // Animate elements inside the card
+                tl.from(nextStep.querySelectorAll('h1, h2, p, .icon, .bento-grid, .polaroid-container, .action-button'), {
+                    autoAlpha: 0,
+                    y: 20,
+                    stagger: 0.1,
+                    duration: 0.5
+                }, "-=0.4");
+                
+                // Update progress bar
+                const progress = (stepNumber - 1) / (numSteps - 1);
+                gsap.to('#progress-bar', { width: `${progress * 100}%`, duration: 0.8, ease: "power2.out" });
+            }
+
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    const nextStep = button.dataset.next;
+                    if (nextStep) {
+                        goToStep(parseInt(nextStep));
+                    }
+                });
+            });
+
+            // Start with step 1
+            goToStep(1);
+
+
+            // --- POLAROID INTERACTION ---
+            const polaroid = document.getElementById('polaroid');
+            const polaroidContainer = document.querySelector('.polaroid-container');
+
+            polaroidContainer.addEventListener('mousemove', (e) => {
+                const rect = polaroidContainer.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                
+                const rotateX = (y / rect.height - 0.5) * -20; // Max 10deg rotation
+                const rotateY = (x / rect.width - 0.5) * 20;  // Max 10deg rotation
+                
+                gsap.to(polaroid, {
+                    rotationX: rotateX,
+                    rotationY: rotateY,
+                    rotationZ: -5,
+                    transformPerspective: 1000,
+                    ease: "power1.out",
+                    duration: 0.5
+                });
+            });
+
+            polaroidContainer.addEventListener('mouseleave', () => {
+                gsap.to(polaroid, {
+                    rotationX: 0,
+                    rotationY: 0,
+                    rotationZ: -5,
+                    ease: "elastic.out(1, 0.3)",
+                    duration: 1
+                });
+            });
+
+            // --- GRAND FINALE ---
+            const celebrateBtn = document.getElementById('celebrate-btn');
+            celebrateBtn.addEventListener('click', () => {
+                celebrateBtn.disabled = true;
+                
+                const finaleTimeline = gsap.timeline();
+                finaleTimeline
+                    .to(celebrateBtn, { autoAlpha: 0, scale: 0.8, duration: 0.3, ease: 'power2.in' })
+                    .set('#final-message', { autoAlpha: 1, y: 20 })
+                    .to('#final-message', { y: 0, duration: 0.5, ease: 'power2.out' });
+
+                // Confetti
+                const duration = 5 * 1000;
+                const animationEnd = Date.now() + duration;
+                const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+
+                function randomInRange(min, max) {
+                    return Math.random() * (max - min) + min;
+                }
+
+                const interval = setInterval(function() {
+                    const timeLeft = animationEnd - Date.now();
+                    if (timeLeft <= 0) {
+                        return clearInterval(interval);
+                    }
+                    const particleCount = 50 * (timeLeft / duration);
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } });
+                    confetti({ ...defaults, particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } });
+                }, 250);
+                
+                 // Gentle emoji confetti
+                const emojiInterval = setInterval(() => {
+                    if (Date.now() > animationEnd) return clearInterval(emojiInterval);
+                     confetti({
+                        particleCount: 2,
+                        angle: 90,
+                        spread: 180,
+                        origin: { y: -0.1 },
+                        scalar: 2,
+                        disableForReducedMotion: true,
+                        decay: 0.9,
+                        shapes: ['emoji'],
+                        shapeOptions: {
+                            emoji: { value: ['❤️', '💖', '✨'] },
+                        },
+                    });
+                }, 200);
+
+                // Animate hearts away
+                finaleRunning = true;
+                hearts.children.forEach(heart => {
+                    gsap.to(heart.position, {
+                        y: heart.position.y + 15,
+                        x: heart.position.x + (Math.random() - 0.5) * 5,
+                        duration: 4,
+                        ease: "power2.inOut",
+                        onComplete: () => {
+                           if (heart.parent) heart.parent.remove(heart);
+                        }
+                    });
+                     gsap.to(heart.rotation, {
+                        y: Math.random() * 20,
+                        x: Math.random() * 20,
+                        duration: 4,
+                        ease: "power2.inOut",
+                    });
+                });
+                 gsap.to('#progress-bar', { width: `100%`, duration: 0.8, ease: "power2.out" });
+            });
+        });
+    </script>
+</body>
+</html>
